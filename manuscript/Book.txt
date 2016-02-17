@@ -3,3 +3,5 @@
 03-RESTful-services.md
 04-messaging.md
 05-batch-processing.md
+06-security.md
+07-monitoring.md
