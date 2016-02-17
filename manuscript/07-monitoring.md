@@ -1,4 +1,135 @@
--# Part 4 Monitoring
+-# Part 4 Monitoring and Instrumentation
+
+# How to instrument applications?
+
+
+## How does it work?
+
+. Define MetricsRegistry which is a JVM wide singleton for metric data
+. Metrics Reporter is associated with the Metrics Registry
+. Application services are instrumented with DropWizard Metrics
+. The reporter reads the data from registry at fixed defined interval and writes this data to the MongoDB datastore is the relevant collection
+
+image::MetricsMongoDB.png[]
+
+
+## Dependencies
+
+The module has following compile time dependencies
+
+* io.dropwizard.metrics:metrics-core:jar:3.1.2
+* org.mongodb:mongo-java-driver:jar:3.1.1
+* org.slf4j:slf4j-api:jar:1.7.13
+
+## Usage
+
+Add the following dependency to your project's Maven POM file.
+
+
+        <dependency>
+            <groupId>io.github.aparnachaudhary</groupId>
+            <artifactId>mongodb-metrics</artifactId>
+            <version>${version.mongodb-reporter}</version>
+        </dependency>
+
+
+        // create metric registry
+        MetricRegistry metricRegistry = new MetricRegistry();
+        // register JVM metrics
+        metricRegistry.register("jvm.attribute", new JvmAttributeGaugeSet());
+
+        MongoDBReporter reporter = MongoDBReporter.forRegistry(metricRegistry)
+                .serverAddresses(new ServerAddress[]{new ServerAddress("192.168.99.100", 32768)})
+                .withDatabaseName("javasedemo")
+                .prefixedWith("javase")
+                .build();
+        // Report metrics every 5 seconds
+        reporter.start(5, TimeUnit.SECONDS);
+
+        // register metric
+        metricRegistry.counter("demo.counter").inc();
+
+        // sleep for 10 seconds so that metric is reported to MongoDB store
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+Executing the above program creates two collections (counter and gauge) in javasedemo database.
+
+*Counter collection:*
+
+
+        /* 0 */
+        {
+            "_id" : ObjectId("565b3b7ec8f3530f3a327001"),
+            "name" : "javase.demo.counter",
+            "count" : 1,
+            "timestamp" : ISODate("2015-11-29T17:53:02Z")
+        }
+        
+        /* 1 */
+        {
+            "_id" : ObjectId("565b3b83c8f3530f3a327005"),
+            "name" : "javase.demo.counter",
+            "count" : 1,
+            "timestamp" : ISODate("2015-11-29T17:53:07Z")
+        }
+
+*Gauge collection:*
+
+Since we also registered the _JvmAttributeGaugeSet_; JVM metrics are registered in the _gauge_ collection.
+
+        /* 0 */
+        {
+            "_id" : ObjectId("565b3b7ec8f3530f3a326ffe"),
+            "name" : "javase.jvm.attribute.name",
+            "value" : "69434@server.local",
+            "timestamp" : ISODate("2015-11-29T17:53:02Z")
+        }
+        
+        /* 1 */
+        {
+            "_id" : ObjectId("565b3b7ec8f3530f3a326fff"),
+            "name" : "javase.jvm.attribute.uptime",
+            "value" : 5711,
+            "timestamp" : ISODate("2015-11-29T17:53:02Z")
+        }
+        
+        /* 2 */
+        {
+            "_id" : ObjectId("565b3b7ec8f3530f3a327000"),
+            "name" : "javase.jvm.attribute.vendor",
+            "value" : "Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 25.5-b02 (1.8)",
+            "timestamp" : ISODate("2015-11-29T17:53:02Z")
+        }
+        
+        /* 3 */
+        {
+            "_id" : ObjectId("565b3b83c8f3530f3a327002"),
+            "name" : "javase.jvm.attribute.name",
+            "value" : "69434@server.local",
+            "timestamp" : ISODate("2015-11-29T17:53:07Z")
+        }
+        
+        /* 4 */
+        {
+            "_id" : ObjectId("565b3b83c8f3530f3a327003"),
+            "name" : "javase.jvm.attribute.uptime",
+            "value" : 10561,
+            "timestamp" : ISODate("2015-11-29T17:53:07Z")
+        }
+        
+        /* 5 */
+        {
+            "_id" : ObjectId("565b3b83c8f3530f3a327004"),
+            "name" : "javase.jvm.attribute.vendor",
+            "value" : "Oracle Corporation Java HotSpot(TM) 64-Bit Server VM 25.5-b02 (1.8)",
+            "timestamp" : ISODate("2015-11-29T17:53:07Z")
+        }
+
+
 
 # How to monitor log files?
 
