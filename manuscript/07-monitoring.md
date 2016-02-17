@@ -1,8 +1,9 @@
 -# Part 4 Monitoring
 
-# ELK Stack
+# How to monitor log files?
 
-## Logstash Set Up ##
+
+## Logstash Set Up
 
     curl -O https://download.elasticsearch.org/logstash/logstash/logstash-1.4.0.beta1.tar.gz
 
@@ -76,4 +77,8 @@
       }
     }
 
+# HTTP JSON Monitoring
+
 # JMX Monitoring
+
+
