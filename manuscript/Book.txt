@@ -2,3 +2,4 @@
 02-data-access.md
 03-RESTful-services.md
 04-messaging.md
+05-batch-processing.md
