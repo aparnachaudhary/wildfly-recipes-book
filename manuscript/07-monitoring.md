@@ -10,7 +10,7 @@
 . Application services are instrumented with DropWizard Metrics
 . The reporter reads the data from registry at fixed defined interval and writes this data to the MongoDB datastore is the relevant collection
 
-image::MetricsMongoDB.png[]
+![Metrics MongoDB](images/MetricsMongoDB.png)
 
 
 ## Dependencies
